@@ -6,7 +6,7 @@ confirm everything works, then switch to the dev way for whichever piece you're 
 
 ## Prerequisites
 - Docker and Docker Compose v2 (`docker compose version`)
-- For native dev: JDK 25, Node.js 24, Python 3.13, Maven 3.9+
+- For native dev: JDK 21, Node.js 24, Python 3.13, Maven 3.9+
 - `curl` and `openssl` (used by the helper scripts)
 
 ## Option A — Everything in Docker (easiest)

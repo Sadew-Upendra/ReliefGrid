@@ -24,7 +24,7 @@ jobs:
         with:
           ref: ${{ github.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          check-regexp: "^(Backend CI|Frontend CI|AI Service CI)$"
+          check-regexp: "^(Backend CI|Frontend CI|AI Service CI|Build and test|Typecheck and build|Train and test|OWASP dependency scan)"
           wait-interval: 15
 
   backend-image:

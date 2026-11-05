@@ -1,9 +1,9 @@
 # ReliefGrid API
 
-Spring Boot 4 · Java 25 · PostgreSQL 17 + PostGIS · Flyway · JWT (Nimbus)
+Spring Boot 4 · Java 21 · PostgreSQL 17 + PostGIS · Flyway · JWT (Nimbus)
 
 ## Run locally
-Requires JDK 25 and Maven 3.9+.
+Requires JDK 21 and Maven 3.9+.
 ```bash
 docker compose up -d db
 export BOOTSTRAP_ADMIN_EMAIL=admin@reliefgrid.local
