@@ -1,0 +1,25 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: reliefgrid
+resources:
+  - ../../base
+  # No postgres.yaml here: production uses AWS RDS (infra/terraform), reached via
+  # DB_URL in the real reliefgrid-secrets Secret — see the note below.
+  - external-secrets.yaml
+patches:
+  - path: patch-resources.yaml
+  - path: patch-hpa.yaml
+  - path: patch-pdb.yaml
+configMapGenerator:
+  - name: reliefgrid-config
+    behavior: merge
+    literals:
+      - CORS_ORIGINS=https://reliefgrid.example.com
+      - NEXT_PUBLIC_API_URL=https://api.reliefgrid.example.com/api/v1
+images:
+  - name: ghcr.io/OWNER/reliefgrid-backend
+    newTag: v0.1.0   # pin to a released tag for production, never :latest
+  - name: ghcr.io/OWNER/reliefgrid-frontend
+    newTag: v0.1.0
+  - name: ghcr.io/OWNER/reliefgrid-ai-service
+    newTag: v0.1.0

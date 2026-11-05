@@ -1,0 +1,78 @@
+{
+  "title": "ReliefGrid Backend",
+  "uid": "reliefgrid-backend",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": { "from": "now-6h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "Request rate (req/s)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job=\"reliefgrid-backend\"}[1m]))",
+          "legendFormat": "requests/s"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "p95 latency by endpoint",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{job=\"reliefgrid-backend\"}[5m])) by (le, uri))",
+          "legendFormat": "{{uri}}"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Error rate (5xx / total)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(rate(http_server_requests_seconds_count{job=\"reliefgrid-backend\", status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{job=\"reliefgrid-backend\"}[5m]))",
+          "legendFormat": "error rate"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "JVM heap used",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "targets": [
+        {
+          "expr": "sum(jvm_memory_used_bytes{job=\"reliefgrid-backend\", area=\"heap\"}) by (id)",
+          "legendFormat": "{{id}}"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "title": "DB connection pool (HikariCP)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 16 },
+      "targets": [
+        { "expr": "hikaricp_connections_active{job=\"reliefgrid-backend\"}", "legendFormat": "active" },
+        { "expr": "hikaricp_connections_idle{job=\"reliefgrid-backend\"}", "legendFormat": "idle" }
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Process CPU usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+      "targets": [
+        { "expr": "process_cpu_usage{job=\"reliefgrid-backend\"}", "legendFormat": "cpu" }
+      ]
+    }
+  ]
+}

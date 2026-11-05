@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: reliefgrid-config
+  namespace: reliefgrid
+data:
+  # Non-secret settings only. Anything sensitive goes in secret.yaml instead.
+  CORS_ORIGINS: "https://reliefgrid.example.com"
+  NEXT_PUBLIC_API_URL: "https://api.reliefgrid.example.com/api/v1"

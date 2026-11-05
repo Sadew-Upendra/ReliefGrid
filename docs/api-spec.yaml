@@ -1,0 +1,187 @@
+openapi: 3.0.3
+info:
+  title: ReliefGrid API
+  version: 0.1.0
+  description: Core REST API for ReliefGrid (MVP).
+servers:
+  - url: http://localhost:8080/api/v1
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  schemas:
+    NeedType: { type: string, enum: [FOOD, WATER, MEDICINE, SHELTER, RESCUE, OTHER] }
+    Urgency: { type: string, enum: [LOW, MEDIUM, HIGH, CRITICAL] }
+    RequestStatus: { type: string, enum: [PENDING, VERIFIED, ASSIGNED, IN_PROGRESS, FULFILLED, REJECTED] }
+    Location:
+      type: object
+      required: [lat, lng]
+      properties: { lat: { type: number }, lng: { type: number } }
+    RegisterRequest:
+      type: object
+      required: [name, email, password]
+      properties:
+        name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        role: { type: string, enum: [CITIZEN, VOLUNTEER, NGO] }
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties: { email: { type: string }, password: { type: string } }
+    TokenResponse:
+      type: object
+      properties: { accessToken: { type: string }, refreshToken: { type: string } }
+    ReliefRequest:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        needType: { $ref: '#/components/schemas/NeedType' }
+        quantity: { type: integer }
+        urgency: { $ref: '#/components/schemas/Urgency' }
+        status: { $ref: '#/components/schemas/RequestStatus' }
+        location: { $ref: '#/components/schemas/Location' }
+        description: { type: string }
+        createdAt: { type: string, format: date-time }
+    CreateReliefRequest:
+      type: object
+      required: [needType, quantity, location]
+      properties:
+        needType: { $ref: '#/components/schemas/NeedType' }
+        quantity: { type: integer, minimum: 1 }
+        location: { $ref: '#/components/schemas/Location' }
+        description: { type: string, maxLength: 2000 }
+    Error:
+      type: object
+      properties: { status: { type: integer }, message: { type: string } }
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Register a new user
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/RegisterRequest' } } }
+      responses:
+        '201': { description: Created }
+        '400': { description: Validation error }
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Log in
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/LoginRequest' } } }
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } }
+        '401': { description: Invalid credentials }
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Exchange refresh token for a new access token
+      responses:
+        '200': { description: OK }
+  /requests:
+    get:
+      tags: [Requests]
+      summary: List relief requests (filter by status, needType, urgency, bounding box)
+      parameters:
+        - { name: status, in: query, schema: { $ref: '#/components/schemas/RequestStatus' } }
+        - { name: needType, in: query, schema: { $ref: '#/components/schemas/NeedType' } }
+        - { name: urgency, in: query, schema: { $ref: '#/components/schemas/Urgency' } }
+        - { name: bbox, in: query, description: 'minLng,minLat,maxLng,maxLat', schema: { type: string } }
+        - { name: page, in: query, schema: { type: integer, default: 0 } }
+      responses:
+        '200':
+          description: OK
+          content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ReliefRequest' } } } }
+    post:
+      tags: [Requests]
+      summary: Submit a new need (CITIZEN, VOLUNTEER, COORDINATOR)
+      requestBody:
+        required: true
+        content: { application/json: { schema: { $ref: '#/components/schemas/CreateReliefRequest' } } }
+      responses:
+        '201':
+          description: Created
+          content: { application/json: { schema: { $ref: '#/components/schemas/ReliefRequest' } } }
+        '400': { description: Validation error }
+  /requests/{id}:
+    get:
+      tags: [Requests]
+      summary: Get a request
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: OK }
+        '404': { description: Not found }
+  /requests/{id}/status:
+    patch:
+      tags: [Requests]
+      summary: Update status (COORDINATOR, ADMIN)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties: { status: { $ref: '#/components/schemas/RequestStatus' } }
+      responses:
+        '200': { description: OK }
+        '403': { description: Forbidden }
+  /requests/{id}/matches:
+    get:
+      tags: [Matching]
+      summary: Nearest supply points and volunteers for a request (COORDINATOR)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses:
+        '200': { description: OK }
+  /supply-points:
+    get:
+      tags: [Inventory]
+      summary: List supply points
+      responses: { '200': { description: OK } }
+    post:
+      tags: [Inventory]
+      summary: Create a supply point (NGO, ADMIN)
+      responses: { '201': { description: Created } }
+  /supply-points/{id}/inventory:
+    put:
+      tags: [Inventory]
+      summary: Update inventory quantities (NGO, ADMIN)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: OK } }
+  /pledges:
+    post:
+      tags: [Inventory]
+      summary: Pledge supplies (NGO, donor)
+      responses: { '201': { description: Created } }
+  /tasks:
+    get:
+      tags: [Tasks]
+      summary: List open tasks, or my tasks with ?mine=true
+      responses: { '200': { description: OK } }
+  /tasks/{id}/accept:
+    post:
+      tags: [Tasks]
+      summary: Accept a task (VOLUNTEER)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: OK }, '409': { description: Already taken } }
+  /tasks/{id}/complete:
+    post:
+      tags: [Tasks]
+      summary: Mark a task completed (VOLUNTEER)
+      parameters: [{ name: id, in: path, required: true, schema: { type: string, format: uuid } }]
+      responses: { '200': { description: OK } }
+  /audit-logs:
+    get:
+      tags: [Admin]
+      summary: Query audit logs (ADMIN)
+      responses: { '200': { description: OK }, '403': { description: Forbidden } }

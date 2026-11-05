@@ -1,0 +1,28 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reliefgrid
+  namespace: reliefgrid
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/rate-limit-rps: "20"
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts: ["reliefgrid.example.com", "api.reliefgrid.example.com"]
+      secretName: reliefgrid-tls
+  rules:
+    - host: reliefgrid.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: frontend, port: { number: 3000 } }
+    - host: api.reliefgrid.example.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: backend, port: { number: 8080 } }

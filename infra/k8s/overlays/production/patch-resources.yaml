@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: backend, namespace: reliefgrid }
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: backend
+          resources:
+            requests: { cpu: 500m, memory: 512Mi }
+            limits: { cpu: 1500m, memory: 1Gi }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata: { name: frontend, namespace: reliefgrid }
+spec:
+  replicas: 3

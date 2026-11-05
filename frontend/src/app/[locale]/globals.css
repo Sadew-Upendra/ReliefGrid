@@ -1,0 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body { @apply bg-paper text-ink font-sans antialiased; }
+:focus-visible { outline: 2px solid #0E7C7B; outline-offset: 2px; }
+
+.rg-dot { width: 18px; height: 18px; border-radius: 9999px; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(15,42,46,.45); cursor: pointer; transition: transform .15s; }
+.rg-dot:hover, .rg-sel { transform: scale(1.35); }
+.rg-sel { box-shadow: 0 0 0 3px #0F2A2E; }
+.rg-done { opacity: .45; }
+.rg-pulse { animation: rg-pulse 1.8s ease-out infinite; }
+@keyframes rg-pulse { 0% { box-shadow: 0 0 0 0 rgba(217,58,43,.55); } 100% { box-shadow: 0 0 0 16px rgba(217,58,43,0); } }
+@media (prefers-reduced-motion: reduce) { .rg-pulse { animation: none; } .rg-dot { transition: none; } }

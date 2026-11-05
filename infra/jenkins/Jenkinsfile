@@ -1,0 +1,112 @@
+// CD pipeline: GitHub Actions (Step 7) owns CI — tests, dependency scan, image build/push.
+// Jenkins picks up from there and owns deployment: staging automatically on main,
+// production only after a human approves the promotion.
+pipeline {
+    agent { label 'kubectl' }
+
+    parameters {
+        string(name: 'IMAGE_TAG', defaultValue: '', description: 'Git SHA or semver tag already built and pushed to GHCR by CI. Leave blank to use the current commit SHA.')
+    }
+
+    environment {
+        AWS_REGION     = 'us-east-1'
+        BACKEND_IMAGE  = 'ghcr.io/OWNER/reliefgrid-backend'
+        FRONTEND_IMAGE = 'ghcr.io/OWNER/reliefgrid-frontend'
+        AI_SERVICE_IMAGE = 'ghcr.io/OWNER/reliefgrid-ai-service'
+        KUSTOMIZE_DIR  = 'infra/k8s/overlays'
+    }
+
+    options {
+        timeout(time: 45, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+
+    stages {
+        stage('Checkout') {
+            steps { checkout scm }
+        }
+
+        stage('Resolve image tag') {
+            steps {
+                script {
+                    env.TAG = params.IMAGE_TAG?.trim() ? params.IMAGE_TAG.trim() : env.GIT_COMMIT.take(7)
+                    echo "Deploying image tag: ${env.TAG}"
+                }
+            }
+        }
+
+        stage('Deploy to staging') {
+            steps {
+                withAWS(role: 'arn:aws:iam::ACCOUNT_ID:role/jenkins-deploy', region: "${AWS_REGION}") {
+                    sh '''
+                        aws eks update-kubeconfig --name reliefgrid-staging --region ${AWS_REGION}
+                        cd ${KUSTOMIZE_DIR}/staging
+                        kustomize edit set image ${BACKEND_IMAGE}=${BACKEND_IMAGE}:${TAG}
+                        kustomize edit set image ${FRONTEND_IMAGE}=${FRONTEND_IMAGE}:${TAG}
+                        kustomize edit set image ${AI_SERVICE_IMAGE}=${AI_SERVICE_IMAGE}:${TAG}
+                        kubectl apply -k .
+                        kubectl -n reliefgrid rollout status deployment/backend --timeout=180s
+                        kubectl -n reliefgrid rollout status deployment/frontend --timeout=180s
+                        kubectl -n reliefgrid rollout status deployment/ai-service --timeout=180s
+                    '''
+                }
+            }
+        }
+
+        stage('Smoke test staging') {
+            steps {
+                sh '''
+                    curl -fsS https://api-staging.reliefgrid.example.com/actuator/health
+                    curl -fsS https://staging.reliefgrid.example.com/ > /dev/null
+                '''
+            }
+        }
+
+        stage('Approve production') {
+            when { branch 'main' }
+            steps {
+                timeout(time: 24, unit: 'HOURS') {
+                    input message: "Promote ${env.TAG} to production?", ok: 'Deploy'
+                }
+            }
+        }
+
+        stage('Deploy to production') {
+            when { branch 'main' }
+            steps {
+                withAWS(role: 'arn:aws:iam::ACCOUNT_ID:role/jenkins-deploy', region: "${AWS_REGION}") {
+                    sh '''
+                        aws eks update-kubeconfig --name reliefgrid-production --region ${AWS_REGION}
+                        cd ${KUSTOMIZE_DIR}/production
+                        kustomize edit set image ${BACKEND_IMAGE}=${BACKEND_IMAGE}:${TAG}
+                        kustomize edit set image ${FRONTEND_IMAGE}=${FRONTEND_IMAGE}:${TAG}
+                        kustomize edit set image ${AI_SERVICE_IMAGE}=${AI_SERVICE_IMAGE}:${TAG}
+                        kubectl apply -k .
+                        kubectl -n reliefgrid rollout status deployment/backend --timeout=300s
+                        kubectl -n reliefgrid rollout status deployment/frontend --timeout=300s
+                        kubectl -n reliefgrid rollout status deployment/ai-service --timeout=300s
+                    '''
+                }
+            }
+        }
+
+        stage('Smoke test production') {
+            when { branch 'main' }
+            steps {
+                sh '''
+                    curl -fsS https://api.reliefgrid.example.com/actuator/health
+                    curl -fsS https://reliefgrid.example.com/ > /dev/null
+                '''
+            }
+        }
+    }
+
+    post {
+        failure {
+            echo "Pipeline failed at ${env.STAGE_NAME}. Rollback: kubectl -n reliefgrid rollout undo deployment/<name>"
+        }
+        always {
+            cleanWs()
+        }
+    }
+}

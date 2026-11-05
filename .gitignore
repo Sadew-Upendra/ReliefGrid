@@ -1,0 +1,25 @@
+# Backend
+backend/target/
+backend/.env
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env*.local
+
+# AI service
+ai-service/__pycache__/
+ai-service/.venv/
+
+# Infra
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate*
+infra/terraform/**/*.tfvars
+infra/docker/.env
+infra/kafka/.env
+
+# Editors / OS
+.idea/
+*.iml
+.vscode/
+.DS_Store

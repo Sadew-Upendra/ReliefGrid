@@ -1,0 +1,24 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: reliefgrid
+resources:
+  - ../../base
+  - postgres.yaml
+  - external-secrets.yaml
+patches:
+  - path: patch-resources.yaml
+configMapGenerator:
+  - name: reliefgrid-config
+    behavior: merge
+    literals:
+      - CORS_ORIGINS=https://staging.reliefgrid.example.com
+      - NEXT_PUBLIC_API_URL=https://api-staging.reliefgrid.example.com/api/v1
+images:
+  - name: ghcr.io/OWNER/reliefgrid-backend
+    newTag: staging
+  - name: ghcr.io/OWNER/reliefgrid-frontend
+    newTag: staging
+  - name: ghcr.io/OWNER/reliefgrid-ai-service
+    newTag: staging
+# HPA is disabled for staging by simply not scaling past the 1-replica patch above;
+# left in from base since removing an HPA via patch is more surprising than harmless idle capacity.

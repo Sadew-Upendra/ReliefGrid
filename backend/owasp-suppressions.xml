@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<suppressions xmlns="https://jeremylong.github.io/DependencyCheck/dependency-suppression.1.3.xsd">
+  <!-- Add <suppress> entries here only for CVEs reviewed and confirmed not exploitable in this app,
+       each with a comment explaining why. Never suppress to silence a real, unfixed vulnerability. -->
+</suppressions>

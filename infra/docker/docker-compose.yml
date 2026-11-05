@@ -1,0 +1,81 @@
+# Full local stack: database, backend API, frontend web app.
+# Run from the repo root:  docker compose -f infra/docker/docker-compose.yml up --build
+# Or, if your Docker Compose version supports --env-file with a relative path,
+# copy infra/docker/.env.example to infra/docker/.env first and edit it.
+
+name: reliefgrid
+
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-reliefgrid}
+      POSTGRES_USER: ${DB_USER:-reliefgrid}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-reliefgrid}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-reliefgrid} -d ${DB_NAME:-reliefgrid}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [reliefgrid]
+
+  backend:
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-reliefgrid}
+      DB_USER: ${DB_USER:-reliefgrid}
+      DB_PASSWORD: ${DB_PASSWORD:-reliefgrid}
+      JWT_SECRET: ${JWT_SECRET:?Set JWT_SECRET in infra/docker/.env — see .env.example}
+      CORS_ORIGINS: ${CORS_ORIGINS:-http://localhost:3000}
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      # Kafka is optional here: bring up infra/kafka/docker-compose.kafka.yml alongside this file
+      # to actually have a broker. Without it, the backend just logs connection warnings and
+      # keeps serving requests — see ADR 0003 and EventPublisher.
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:29092}
+      # Left blank by default: notifications just log instead of sending real email — see backend/README.md.
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks: [reliefgrid]
+
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:8080/api/v1}
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks: [reliefgrid]
+
+networks:
+  reliefgrid:
+    driver: bridge
+
+volumes:
+  db-data:

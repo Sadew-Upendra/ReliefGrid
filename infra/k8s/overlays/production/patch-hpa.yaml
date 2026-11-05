@@ -1,0 +1,13 @@
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: backend, namespace: reliefgrid }
+spec:
+  minReplicas: 3
+  maxReplicas: 10
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: { name: frontend, namespace: reliefgrid }
+spec:
+  minReplicas: 3
+  maxReplicas: 6

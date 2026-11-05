@@ -1,0 +1,107 @@
+{
+  "nav": {
+    "brand": "ReliefGrid",
+    "openLiveMap": "Open live map",
+    "liveStatus": "Live status",
+    "language": "Language"
+  },
+  "landing": {
+    "title": "Get help to the places that need it first.",
+    "subtitle": "Reports, supplies, and volunteers on one live map, so coordinators can act in minutes instead of chasing messages.",
+    "openLiveMap": "Open live map",
+    "reportNeed": "Report a need",
+    "rightNowNear": "Right now near Kelaniya"
+  },
+  "dashboard": {
+    "reportNeed": "Report a need",
+    "whatIsNeeded": "What is needed?",
+    "howMany": "How many people or units?",
+    "whatIsHappening": "What is happening?",
+    "whatIsHappeningPlaceholder": "Example: 20 families in the school hall, no drinking water since yesterday.",
+    "lifeAtRisk": "Someone's life is at immediate risk",
+    "tapMapToPlacePin": "Tap the map to place the pin.",
+    "locationSetMoveHint": "Location set. Tap the map again to move it.",
+    "send": "Send request",
+    "sending": "Sending\u2026",
+    "noRequestsMatch": "No requests match this filter. Try \"All\" or report a new need.",
+    "all": "All",
+    "verify": "Verify",
+    "markFulfilled": "Mark fulfilled",
+    "requestSentToast": "Request sent. A coordinator will review it shortly.",
+    "markedVerifiedToast": "Marked as verified",
+    "markedFulfilledToast": "Marked as fulfilled",
+    "closeForm": "Close form",
+    "closeDetails": "Close details",
+    "offlineBanner": "You're offline. Showing the last loaded data \u2014 new reports can't be sent until you're back online."
+  },
+  "status": {
+    "title": "ReliefGrid \u2014 Live Status",
+    "subtitle": "A public, read-only view of current relief activity. No names, locations, or personal details are shown here.",
+    "openRequests": "Open requests",
+    "fulfilledRequests": "Fulfilled requests",
+    "activeVolunteerTasks": "Active volunteer tasks",
+    "byUrgency": "Open requests by urgency",
+    "byNeedType": "Open requests by need type",
+    "generatedAt": "Last updated",
+    "loadError": "Could not load live status right now. Please try again shortly.",
+    "backHome": "Back to home"
+  },
+  "auth": {
+    "login": "Log in",
+    "register": "Register",
+    "logout": "Log out",
+    "email": "Email",
+    "password": "Password",
+    "fullName": "Full name",
+    "role": "I am a\u2026",
+    "submitLogin": "Log in",
+    "submitRegister": "Create account",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "signUpLink": "Sign up",
+    "logInLink": "Log in",
+    "loggingIn": "Logging in\u2026",
+    "registering": "Creating account\u2026",
+    "loginError": "Could not log in. Check your email and password.",
+    "registerError": "Could not create your account.",
+    "signInRequired": "Please log in to continue.",
+    "roleCitizen": "Citizen reporting needs",
+    "roleVolunteer": "Volunteer",
+    "roleNgo": "NGO / donor",
+    "redirecting": "Redirecting\u2026",
+    "loggedInAs": "Signed in as"
+  },
+  "forecast": {
+    "title": "Demand Forecast",
+    "subtitle": "Recent daily request counts and a simple projection for the next week, per need type. For coordinators planning ahead \u2014 not a guarantee.",
+    "backToDashboard": "Back to dashboard",
+    "days": "History window",
+    "trendRising": "Rising",
+    "trendFalling": "Falling",
+    "trendFlat": "Flat",
+    "historyLegend": "Actual",
+    "forecastLegend": "Projected",
+    "loadError": "Could not load the forecast right now. Please try again shortly.",
+    "noData": "Not enough recent data to forecast yet."
+  },
+  "needs": {
+    "FOOD": "Food",
+    "WATER": "Clean water",
+    "MEDICINE": "Medicine",
+    "SHELTER": "Shelter",
+    "RESCUE": "Rescue",
+    "OTHER": "Other"
+  },
+  "urgency": {
+    "CRITICAL": "Critical",
+    "HIGH": "High",
+    "MEDIUM": "Medium",
+    "LOW": "Low"
+  },
+  "requestStatus": {
+    "PENDING": "Waiting for review",
+    "VERIFIED": "Verified",
+    "ASSIGNED": "Help on the way",
+    "FULFILLED": "Fulfilled"
+  }
+}
