@@ -7,7 +7,7 @@ COPY src src
 RUN mvn -B -q clean package -DskipTests
 
 # --- Run stage ---
-FROM eclipse-temurin:21-jre
+FROM eclipse-temurin:25-jre
 RUN apt-get update && apt-get install -y --no-install-recommends wget \
     && rm -rf /var/lib/apt/lists/* \
     && useradd --system --uid 10001 reliefgrid
