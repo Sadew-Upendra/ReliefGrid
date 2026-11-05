@@ -29,7 +29,7 @@ ReliefGrid gives coordinators one trusted source of truth:
 | Layer | Technology |
 |---|---|
 | Frontend | Next.js, TypeScript, Tailwind CSS, shadcn/ui, MapLibre GL |
-| Backend | Spring Boot 3, Java 21, Spring Security, JPA |
+| Backend | Spring Boot 4, Java 21, Spring Security, JPA |
 | Database | PostgreSQL + PostGIS, Redis |
 | Messaging | Apache Kafka |
 | AI service | Python, FastAPI, scikit-learn / transformers |
