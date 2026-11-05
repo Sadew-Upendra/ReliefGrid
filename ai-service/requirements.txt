@@ -4,5 +4,5 @@ pydantic==2.10.4
 pydantic-settings==2.7.1
 confluent-kafka==2.6.1
 scikit-learn==1.6.0
-joblib==1.4.2
+joblib==1.6.0
 numpy==2.2.1
