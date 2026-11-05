@@ -71,6 +71,14 @@ jobs:
           java-version: "21"
           cache: maven
 
+      - name: Cache OWASP Dependency-Check data
+        uses: actions/cache@v4
+        with:
+          path: backend/target/dependency-check-data
+          key: ${{ runner.os }}-dependency-check-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-dependency-check-
+
       # NVD_API_KEY (free, from nvd.nist.gov) makes this step minutes instead of hours,
       # and lets it fail the build reliably. Add it under repo Settings > Secrets > Actions.
       # Without the key the step still runs but is best-effort (continue-on-error).
