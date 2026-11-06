@@ -1,82 +1,128 @@
-# ReliefGrid
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/reliefgrid-logo-transparent.png">
+    <img src="docs/assets/reliefgrid-logo-light.png" alt="ReliefGrid - Coordinate. Respond. Rebuild." width="420">
+  </picture>
+</p>
 
-> A disaster relief coordination platform that connects people in need with supplies and volunteers, in real time.
+<p align="center">
+  <b>Disaster relief coordination on one live map.</b><br>
+  Report needs, match them with supplies and volunteers, and let AI triage what matters first.
+</p>
 
-## The Problem
-During floods, landslides and other disasters, help is wasted. Donations pile up in one place while another has none, volunteers don't know where to go, and needs are scattered across WhatsApp and Facebook posts.
+<p align="center">
+  <img alt="Backend CI" src="https://github.com/Sadew-Upendra/ReliefGrid/actions/workflows/backend-ci.yml/badge.svg">
+  <img alt="Frontend CI" src="https://github.com/Sadew-Upendra/ReliefGrid/actions/workflows/frontend-ci.yml/badge.svg">
+  <img alt="AI Service CI" src="https://github.com/Sadew-Upendra/ReliefGrid/actions/workflows/ai-service-ci.yml/badge.svg">
+  <img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-0E7C7B.svg">
+</p>
 
-## The Solution
-ReliefGrid gives coordinators one trusted source of truth:
+---
 
-- **Report needs** (food, medicine, shelter, rescue) with location and urgency
-- **Pledge supplies** and manage inventory at supply points
-- **Volunteer** for tasks near you
-- **Live map** of needs vs. available resources
-- **Smart matching** of needs to the nearest supply and volunteers
-- **AI triage** that classifies urgency and extracts location and need type from free text
-- **Dashboards, audit logs and reports** for coordinators and admins
+## The problem
 
-## User Roles
-| Role | Can do |
-|---|---|
-| Citizen / Reporter | Submit and track needs |
-| Volunteer | Browse, accept and complete tasks |
-| NGO / Donor | Manage supply points, inventory and pledges |
-| Coordinator | Verify reports, assign tasks, close requests |
-| Admin | Manage users, view audit logs, configure system |
+During floods and landslides, help gets wasted. Donations pile up in one place while another
+has none, volunteers don't know where to go, and needs are scattered across WhatsApp and
+Facebook posts. ReliefGrid puts reports, supplies, and volunteers on one trusted map so
+coordinators can act in minutes.
 
-## Tech Stack
+## Features
+
+- **Live map** of needs and supply points, colored by urgency
+- **AI triage**: urgency and need type are classified from free-text reports
+- **Role-based workflow** for citizens, volunteers, NGOs, coordinators, and admins
+- **Smart matching**: nearest supply points that hold the needed item (PostGIS)
+- **Volunteer tasks** with safe accept/complete handling (no double-booking)
+- **Notifications** on status changes and task assignments
+- **Demand forecasting** per need type for coordinators
+- **Public status page** with aggregate counts only, no personal data
+- **Three languages**: English, Sinhala, Tamil
+- **Offline-friendly PWA** shell, installable on a phone
+- **Audit log** of every state change
+
+## Architecture
+
+```mermaid
+flowchart LR
+  U[Users] --> W[Next.js frontend]
+  W -->|HTTPS + JWT| A[Spring Boot API]
+  A --> P[(PostgreSQL + PostGIS)]
+  A -->|events| K{{Kafka}}
+  K --> AI[AI service<br/>FastAPI]
+  AI -->|classification| K
+  K --> A
+  A -. metrics .-> M[Prometheus] --> G[Grafana]
+```
+
+The backend is a modular monolith (package by feature) with one separate AI microservice.
+Services communicate through Kafka, so an AI or notification outage never blocks a
+citizen from submitting a request. Details: [`docs/architecture.md`](docs/architecture.md).
+
+## Tech stack
+
 | Layer | Technology |
 |---|---|
-| Frontend | Next.js, TypeScript, Tailwind CSS, shadcn/ui, MapLibre GL |
-| Backend | Spring Boot 4, Java 21, Spring Security, JPA |
-| Database | PostgreSQL + PostGIS, Redis |
+| Frontend | Next.js, TypeScript, Tailwind CSS, MapLibre GL, next-intl |
+| Backend | Spring Boot 4, Java 21, Spring Security, Flyway |
+| Data | PostgreSQL 17 + PostGIS |
 | Messaging | Apache Kafka |
-| AI service | Python, FastAPI, scikit-learn / transformers |
-| CI/CD | GitHub Actions (CI), Jenkins (CD) |
-| Infrastructure | Docker, Kubernetes, Terraform |
-| Monitoring | Prometheus, Grafana |
-| Cloud | AWS (EKS, RDS, MSK, ECR, S3, Route 53) |
+| AI / ML | Python, FastAPI, scikit-learn |
+| Delivery | Docker, GitHub Actions, Jenkins, Kubernetes (kustomize) |
+| Infrastructure | Terraform on AWS (EKS, RDS, MSK, ECR, Route 53) |
+| Observability | Prometheus, Grafana |
 
-## Documentation
-- [Architecture and data model](docs/architecture.md)
-- [API specification (OpenAPI)](docs/api-spec.yaml)
-- [Security notes](docs/security.md) · [Frontend authentication](docs/frontend-auth.md)
-- [Kafka](docs/kafka.md) · [Demand forecasting](docs/forecasting.md)
-- [AWS deployment runbook](docs/deployment-aws.md) · [Release guide](docs/release-guide.md) · [Running locally](docs/running-locally.md)
-- Architecture Decision Records: [docs/adr](docs/adr)
+## Quick start
 
-## Repository Structure
+Requires Docker with Compose v2.
+
+```bash
+git clone https://github.com/Sadew-Upendra/ReliefGrid.git
+cd ReliefGrid
+./scripts/dev-up.sh
+./scripts/seed-admin.sh admin@reliefgrid.com 'admin@reliefgrid123'
+```
+
+| Service | URL |
+|---|---|
+| Frontend | http://localhost:3000 |
+| Backend API | http://localhost:8080 |
+| AI service | http://localhost:8000 |
+
+Register a citizen account at `/register`, submit a request containing the word "trapped",
+and the AI service will raise its urgency to critical within seconds. Stop everything with
+`./scripts/dev-down.sh`. For native development per service, see
+[`docs/running-locally.md`](docs/running-locally.md).
+
+## Project structure
+
 ```
 reliefgrid/
-├── frontend/        # Next.js app
-├── backend/         # Spring Boot API
-├── ai-service/      # FastAPI service
-├── infra/           # docker/, terraform/, k8s/, jenkins/, kafka/, grafana/
-├── scripts/         # dev-up.sh, dev-down.sh, seed-admin.sh
-├── docs/
+├── frontend/      Next.js app (i18n, PWA)
+├── backend/       Spring Boot API
+├── ai-service/    FastAPI: triage and forecasting
+├── infra/         docker, kafka, grafana, k8s, terraform, jenkins
+├── scripts/       dev-up, dev-down, seed-admin
+├── docs/          architecture, security, runbooks, ADRs
 └── CHANGELOG.md
 ```
 
-## Getting Started
+## Documentation
 
-```bash
-git clone https://github.com/Sadew-Upendra/reliefgrid.git
-cd reliefgrid
-./scripts/dev-up.sh
-```
-Starts the whole stack (database, backend, frontend, Kafka, AI service) with a freshly
-generated JWT secret. Frontend at http://localhost:3000, API at http://localhost:8080.
-Full walkthrough, including creating an admin account and verifying everything actually
-works end to end: **[docs/running-locally.md](docs/running-locally.md)**.
+| | |
+|---|---|
+| [Architecture](docs/architecture.md) | system design, data model, Kafka topics |
+| [API spec](docs/api-spec.yaml) | OpenAPI definition |
+| [Running locally](docs/running-locally.md) | Docker and native setup, troubleshooting |
+| [Security](docs/security.md) | auth, rate limiting, secrets, scanning |
+| [AWS deployment](docs/deployment-aws.md) | Terraform to live environment |
+| [Release guide](docs/release-guide.md) | versioning, tagging, rollback |
+| [Decision records](docs/adr) | why key choices were made |
 
-Cutting and deploying a release: **[docs/release-guide.md](docs/release-guide.md)**. Change
-history: **[CHANGELOG.md](CHANGELOG.md)**.
+## Contributing
 
-## Roadmap
-- [x] **Phase 1 (MVP):** auth + RBAC, needs, supply and inventory, tasks, live map, nearest-match, audit log
-- [x] **Phase 2:** Kafka streaming, AI triage service (`ai-service/`), notifications, Grafana dashboards
-- [x] **Phase 3:** demand forecasting (API + coordinator chart at `/forecast`), offline-friendly PWA, multi-language (English, Sinhala, Tamil), public status page (`/status`)
+Branch from `main`, use [Conventional Commits](https://www.conventionalcommits.org)
+(`feat(request): ...`, `fix(task): ...`), and open a pull request. CI must pass before merge.
 
 ## License
-MIT
+
+Released under the [MIT License](LICENSE).
