@@ -14,6 +14,7 @@ import {
   NEED_TYPES, NeedType, ReliefRequest, Status, URGENCY_COLOR, URGENCY_LEVELS, Urgency,
   createRequest, listRequests, timeAgo, updateStatus,
 } from "@/lib/api";
+import Logo from "@/components/Logo";
 
 const ReliefMap = dynamic(() => import("@/components/ReliefMap"), { ssr: false, loading: () => <div className="h-full w-full animate-pulse bg-line" /> });
 
@@ -67,7 +68,7 @@ function Dashboard() {
     <div className="flex h-screen flex-col">
       <OfflineBanner />
       <header className="flex items-center justify-between border-b border-line bg-white px-5 py-3">
-        <Link href="/" className="font-display text-lg font-bold tracking-tight">ReliefGrid</Link>
+        <Logo height={32} />
         <div className="flex items-center gap-3">
           {canModerate && (
             <Link href="/forecast" className="hidden text-sm font-medium text-ink/70 hover:text-ink sm:inline">

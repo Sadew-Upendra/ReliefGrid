@@ -2,6 +2,7 @@ import { ArrowRight, MapPin } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
+import Logo from "@/components/Logo";
 import NavAuthLinks from "@/components/NavAuthLinks";
 import { SEED, URGENCY_COLOR } from "@/lib/api";
 
@@ -11,7 +12,7 @@ export default async function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-6xl flex-col px-6">
       <header className="flex items-center justify-between py-6">
-        <span className="font-display text-xl font-bold tracking-tight">{t("nav.brand")}</span>
+        <Logo height={40} priority />
         <div className="flex items-center gap-4">
           <Link href="/status" className="text-sm font-medium text-ink/70 hover:text-ink">
             {t("nav.liveStatus")}

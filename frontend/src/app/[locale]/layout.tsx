@@ -15,6 +15,10 @@ export const metadata: Metadata = {
   title: "ReliefGrid",
   description: "Coordinate disaster relief on one live map.",
   manifest: "/manifest.webmanifest",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/icons/apple-touch-icon.png",
+  },
   appleWebApp: { capable: true, statusBarStyle: "default", title: "ReliefGrid" },
 };
 
