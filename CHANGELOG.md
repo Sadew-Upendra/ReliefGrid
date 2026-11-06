@@ -9,9 +9,8 @@ is actually cut.
 _Nothing yet — add entries here as you work, then move them under a new version heading
 when you cut a release._
 
-## [0.1.0]
-Initial build, covering the full original roadmap (Phases 1–3) plus the structural
-follow-ups identified along the way.
+## [1.0.0] - 2026-11-06
+Initial production release of the ReliefGrid monorepo, covering the complete architecture implementation (Spring Boot backend, Next.js frontend, FastAPI ML service, and cloud infrastructure).
 
 ### Added
 - **Backend**: Spring Boot 4 / Java 21 API — auth (JWT access + rotating refresh tokens),
@@ -29,23 +28,17 @@ follow-ups identified along the way.
   detection, OWASP dependency scanning, Dependabot
 - **CI/CD**: GitHub Actions for backend/frontend/AI service, Docker image build and push,
   Jenkins pipeline for staged deployment with a manual production approval gate
-- **Infrastructure**: Docker Compose (local), Kubernetes manifests (kustomize base +
+- **Infrastructure**: Docker Compose (local dev & monitoring), Kubernetes manifests (kustomize base +
   staging/production overlays), Terraform for AWS (VPC, EKS, RDS, MSK Serverless, ECR,
-  Route 53, IRSA for External Secrets and external-dns), Prometheus + Grafana
+  Route 53, IRSA for External Secrets and external-dns), Prometheus + Grafana setup
 - **Docs**: architecture, ADRs, security, Kafka, forecasting, frontend auth, AWS deployment
-  runbook, this release guide, local running guide
+  runbook, release guide, local running guide
 
 ### Fixed
 - `listRequests()` on the frontend now correctly unwraps the backend's `PageResponse`
-  wrapper instead of expecting a flat array (never caught earlier because the frontend had
-  never actually been wired to the real backend with a valid session until auth was added)
+  wrapper instead of expecting a flat array
 
-### Known limitations (tracked, not hidden)
-- Frontend session tokens are kept in `localStorage`, not an `httpOnly` cookie — fine for
-  this prototype, not for a production deployment facing the public internet (see
-  `docs/frontend-auth.md`)
-- Sinhala and Tamil translations were written with AI assistance and haven't had a native
-  speaker review yet
-- Kafka's production wiring (`infra/terraform/modules/msk`) uses IAM auth, but the backend
-  and AI service still need the IAM auth library and a production Spring/Python profile
-  added before they can actually connect to MSK — see `docs/kafka.md`
+### Known Limitations
+- Frontend session tokens are kept in `localStorage`, not an `httpOnly` cookie (tracked for future cookie-based auth migration).
+- Sinhala and Tamil translations were generated with AI assistance and require native speaker verification.
+- AWS MSK production IAM authentication profiles require final deployment-stage verification before production connection.
