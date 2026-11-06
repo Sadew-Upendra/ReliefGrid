@@ -3,10 +3,10 @@ name: AI Service CI
 on:
   push:
     branches: [main]
-    paths: ["ai-service/**", ".github/workflows/ai-service-ci.yml"]
+    paths: ["ai-service/**", ".github/workflows/*.yml"]
   pull_request:
     branches: [main]
-    paths: ["ai-service/**", ".github/workflows/ai-service-ci.yml"]
+    paths: ["ai-service/**", ".github/workflows/*.yml"]
 
 defaults:
   run:
