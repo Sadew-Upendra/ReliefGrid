@@ -19,12 +19,14 @@ jobs:
     name: Wait for CI
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for backend-ci, frontend-ci, and ai-service-ci
+      - name: Wait for blocking CI checks
         uses: lewagon/wait-on-check-action@v1.3.4
         with:
           ref: ${{ github.sha }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          check-regexp: "^(Backend CI|Frontend CI|AI Service CI|Build and test|Typecheck and build|Train and test|OWASP dependency scan)"
+          # Dependency-Check is informational and intentionally non-blocking.
+          # Waiting on it causes Docker image promotion to hang on a slow/optional scan.
+          check-regexp: "^(Backend CI|Frontend CI|AI Service CI|Build and test|Typecheck and build|Train and test)$"
           wait-interval: 15
 
   backend-image:
